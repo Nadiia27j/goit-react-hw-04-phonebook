@@ -1,10 +1,11 @@
 import { useState } from 'react';
+import { toast } from 'react-toastify';
 import { nanoid } from 'nanoid';
 import Section from './Section/Section';
 import ContactForm from './ContactForm/ContactForm';
 import Filter from './Filter/Filter';
 import ContactList from './ContactList/ContactList';
-import { useLocalStorage } from 'hooks/useLocalStorage';
+import  useLocalStorage  from 'hooks/useLocalStorage';
 
 
 
@@ -26,22 +27,31 @@ export const App = () => {
       id: nanoid(),
       name,
       number,
-    }  
+    }; 
     
-   
+   if (contacts.find(contact => contact.name.toLowerCase() === newContact.name.toLowerCase())) {
+    toast.error(`${newContact.name} is already in contacts`);
+    return;
+   }
+
+   setContacts(contacts => [newContact, ...contacts]);
   };
 
   const changeFilter = e => {
     setFilter( e.currentTarget.value );
   };
 
-  
-  handlerRemoveButton = name => {
-    this.setState(prevState => ({
-      contacts: prevState.contacts.filter(contact => contact.name !== name),
-    }));
+  const getVisibleContacts = () => {
+    const normalizedFilter = filter.toLowerCase();
 
-    this.setState({ filter: '' });
+    return contacts.filter(contact =>
+      contact.name.toLowerCase().includes(normalizedFilter)
+    );
+  };
+
+
+  const handlerRemoveButton = id => {
+    setContacts(prevState => prevState.filter(contact => contact.id !== id));
   };
 
 
@@ -54,7 +64,7 @@ export const App = () => {
       <Section title="Contacts">
         <Filter value={filter} onChange={changeFilter} />
         <ContactList
-          contacts={}
+          contacts={getVisibleContacts()}
           onClick={handlerRemoveButton}
         />
       </Section>
